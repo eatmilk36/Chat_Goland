@@ -4,12 +4,16 @@ FROM golang:1.22
 # 設定工作目錄
 WORKDIR /app
 
-# 複製 go.mod 和 main.go 如果有外部依賴要有go.sum
-COPY go.mod ./
+# 複製 go.mod 和 go.sum
+COPY go.mod go.sum ./
 RUN go mod download
 
-# 複製所有 Go 源代碼並編譯
+# 複製所有 Go 源代碼
 COPY . ./
+
+RUN ls -al /app
+
+# 編譯 Go 程式
 RUN go build -o myapp .
 
 # 確保 myapp 擁有執行權限

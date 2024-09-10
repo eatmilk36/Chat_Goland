@@ -1,26 +1,40 @@
 package main
 
 import (
+	"chat/Handler/Login"
+	"chat/Repositories"
+	"chat/Repositories/models"
 	"fmt"
-	"net"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func main() {
-	fmt.Println("Hello World")
-	listen, err := net.Listen("tcp", ":8080")
+	Repositories.InitDatabase()
+
+	id, err2 := models.GetUserByAccountAndPassword("Jeter", "MD5")
+	if err2 != nil {
+		return
+	}
+
+	fmt.Println("id:", id)
+
+	server := gin.Default()
+
+	server.GET("hello/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		c.JSON(http.StatusOK, gin.H{"hello": name})
+	})
+
+	server.GET("hello2/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		c.JSON(http.StatusOK, gin.H{"hello": name})
+	})
+
+	server.POST("Login", Login.LoginHandler)
+
+	err := server.Run(":8080")
 	if err != nil {
 		panic("服務器啟動失敗")
 	}
-	for {
-		accept, err := listen.Accept()
-		if err != nil {
-			continue
-		}
-
-		go handleConnection(accept)
-	}
-}
-
-func handleConnection(accept net.Conn) {
-	fmt.Println("連接成功")
 }

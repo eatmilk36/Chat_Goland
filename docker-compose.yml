@@ -2,12 +2,14 @@ services:
   app:
     build: .
     working_dir: /app
-    command: ["./myapp"]
+    command: [ "./myapp" ]
     # volumes:
-      # - .:/app
+    # - .:/app
     ports:
       - "8080:8080"
-      
+    networks:
+      - app_network
+
   mysql:
     image: mysql:5.7
     container_name: mysql
@@ -18,7 +20,7 @@ services:
       MYSQL_PASSWORD: 12345678
     ports:
       - "3306:3306"
-    # volumes:
+      # volumes:
       # - mysql_data:/var/lib/mysql
     networks:
       - app_network
@@ -26,27 +28,28 @@ services:
   redis:
     image: redis:6
     container_name: redis
-    command: ["redis-server", "--requirepass", "jeter"]
+    command: [ "redis-server", "--requirepass", "jeter" ]
     ports:
       - "6379:6379"
-    # volumes:
+      # volumes:
       # - redis_data:/data
     networks:
       - app_network
 
-# volumes:
-  # mysql_data:
-    # driver: local
-    # driver_opts:
+      # volumes:
+      # mysql_data:
+      # driver: local
+      # driver_opts:
       # type: none
       # o: bind
       # device: /mnt/c/Users/jeter_hsu/Desktop/docker/mysql
-  # redis_data:
-    # driver: local
-    # driver_opts:
+      # redis_data:
+      # driver: local
+      # driver_opts:
       # type: none
       # o: bind
       # device: /mnt/c/Users/jeter_hsu/Desktop/docker/redis
 
 networks:
   app_network:
+    driver: bridge

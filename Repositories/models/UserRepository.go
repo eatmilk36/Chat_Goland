@@ -22,7 +22,7 @@ func DeleteUser(id uint) error {
 
 func GetUserByAccountAndPassword(account string, password string) (*User, error) {
 	var user User
-	if err := Repositories.DB.Where("account = ? AND password >= ?", account, password).First(&user).Error; err != nil {
+	if err := Repositories.DB.Where("account = ? AND password = ?", account, password).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil

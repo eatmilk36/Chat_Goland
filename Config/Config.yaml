@@ -19,3 +19,6 @@ mysql:
   MaxLifetime: 10
   MaxOpenConnections: 10
   MaxIdleConnections: 10
+
+Jwt:
+  SecretKey: "d86ecd989966768001ae86ac7069a699c15fe9b2cb10ee27f538cf36108c7a71"

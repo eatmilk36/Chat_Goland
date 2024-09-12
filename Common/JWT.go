@@ -1,13 +1,11 @@
 package Common
 
 import (
+	"chat/Config"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
-
-// Secret Key 用於簽名 JWT  TODO:之後要移去Config.yaml
-var secretKey = []byte("d86ecd989966768001ae86ac7069a699c15fe9b2cb10ee27f538cf36108c7a71")
 
 // MyCustomClaims 定義自訂的 Claim 結構
 type MyCustomClaims struct {
@@ -17,6 +15,7 @@ type MyCustomClaims struct {
 
 // GenerateJWT 產生JWT Token
 func GenerateJWT(username string) (string, error) {
+
 	// 設定過期時間
 	expirationTime := time.Now().Add(1 * time.Hour)
 
@@ -33,7 +32,8 @@ func GenerateJWT(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 簽名 Token 並返回作為字串
-	tokenString, err := token.SignedString(secretKey)
+	config, _ := Config.LoadConfig()
+	tokenString, err := token.SignedString(config.Jwt.SecretKey)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +48,8 @@ func ValidateJWT(tokenString string) (*MyCustomClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return secretKey, nil
+		config, _ := Config.LoadConfig()
+		return config.Jwt.SecretKey, nil
 	})
 
 	if err != nil {

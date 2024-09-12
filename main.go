@@ -3,10 +3,7 @@ package main
 import (
 	"chat/Controller"
 	"chat/Redis"
-	"chat/Repositories"
-	"chat/Repositories/models"
 	"context"
-	"fmt"
 	"log"
 )
 
@@ -30,15 +27,6 @@ func main() {
 	}
 
 	log.Printf("Value from Hash: %s", value)
-
-	Repositories.InitDatabase()
-
-	user, err := models.GetUserByAccountAndPassword("jeter", "MD5")
-	if err != nil {
-		fmt.Println("sql query failed", err)
-	}
-
-	fmt.Println("result:", user)
 
 	Controller.RouterInit()
 }

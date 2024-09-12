@@ -1,12 +1,21 @@
 package Login
 
 import (
-	"chat/Repositories/models"
+	"chat/Ineterface"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func LoginHandler(c *gin.Context) {
+type LoginHandler struct {
+	userRepo Ineterface.UserRepository
+}
+
+// NewLoginHandler 建立 LoginHandler 並注入 UserRepository
+func NewLoginHandler(userRepo Ineterface.UserRepository) *LoginHandler {
+	return &LoginHandler{userRepo: userRepo}
+}
+
+func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
 	var req LoginRequest
 
 	// 綁定 JSON 參數
@@ -16,7 +25,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 使用解析出的 account 和 password
-	user, err := models.GetUserByAccountAndPassword(req.Account, req.Password)
+	user, err := h.userRepo.GetUserByAccountAndPassword(req.Account, req.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "user not found")

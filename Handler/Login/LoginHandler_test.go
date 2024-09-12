@@ -1,7 +1,6 @@
 package Login
 
 import (
-	"chat/Repositories"
 	"chat/Repositories/models"
 	"chat/Test"
 	"github.com/go-playground/assert/v2"
@@ -22,8 +21,6 @@ func TestUserInsert(t *testing.T) {
 	// 使用共用的 SetupTestDB 和 ResetDB
 	db := Test.SetupTestDB(t)
 	Test.ResetDB(db)
-
-	Repositories.DB = db
 
 	// 插入測試資料
 	user := models.User{
@@ -48,7 +45,9 @@ func TestUserInsert(t *testing.T) {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
 
-	userModel, _ := models.GetUserByAccountAndPassword("Jeter", "MD5")
+	repository := models.NewGormUserRepository(db)
+
+	userModel, _ := repository.GetUserByAccountAndPassword("Jeter", "MD5")
 
 	assert.Equal(t, "Jeter", userModel.Account)
 }

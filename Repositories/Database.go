@@ -9,9 +9,11 @@ import (
 	"time"
 )
 
-var DB *gorm.DB
+type GormUserRepository struct {
+	db *gorm.DB
+}
 
-func InitDatabase() {
+func (repo GormUserRepository) InitDatabase() *gorm.DB {
 	config, err2 := Config.LoadConfig()
 	if err2 != nil {
 		panic("Config file load failed")
@@ -19,19 +21,21 @@ func InitDatabase() {
 	addr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True",
 		config.MySql.UserName, config.MySql.Password, config.MySql.Address, config.MySql.Port, config.MySql.Database)
 	var err error
-	DB, err = gorm.Open(mysql.Open(addr), &gorm.Config{})
+	repo.db, err = gorm.Open(mysql.Open(addr), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
-	DB, err := DB.DB()
+	db, err := repo.db.DB()
 
 	if err != nil {
 		fmt.Println("Failed to connect to database:", err)
-		return
+		return nil
 	}
 
-	DB.SetConnMaxLifetime(time.Duration(config.MySql.MaxLifetime) * time.Second)
-	DB.SetMaxIdleConns(config.MySql.MaxIdleConnections)
-	DB.SetMaxOpenConns(config.MySql.MaxOpenConnections)
+	db.SetConnMaxLifetime(time.Duration(config.MySql.MaxLifetime) * time.Second)
+	db.SetMaxIdleConns(config.MySql.MaxIdleConnections)
+	db.SetMaxOpenConns(config.MySql.MaxOpenConnections)
+
+	return repo.db
 }

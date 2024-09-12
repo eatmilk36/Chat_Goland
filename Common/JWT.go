@@ -1,0 +1,64 @@
+package Common
+
+import (
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
+	"time"
+)
+
+// Secret Key 用於簽名 JWT  TODO:之後要移去Config.yaml
+var secretKey = []byte("d86ecd989966768001ae86ac7069a699c15fe9b2cb10ee27f538cf36108c7a71")
+
+// MyCustomClaims 定義自訂的 Claim 結構
+type MyCustomClaims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+// GenerateJWT 產生JWT Token
+func GenerateJWT(username string) (string, error) {
+	// 設定過期時間
+	expirationTime := time.Now().Add(1 * time.Hour)
+
+	// 建立自訂的 Claims
+	claims := MyCustomClaims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			Issuer:    "your-app",
+		},
+	}
+
+	// 建立 Token，使用 HS256 演算法
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// 簽名 Token 並返回作為字串
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func ValidateJWT(tokenString string) (*MyCustomClaims, error) {
+	// 解析並驗證 JWT
+	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// 確認使用的簽名方法是否正確
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// 檢查 token 是否有效以及是否有自訂 Claims
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("invalid token")
+}

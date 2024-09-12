@@ -7,9 +7,7 @@ import (
 	"net/http"
 )
 
-func RouterInit() {
-	server := gin.Default()
-
+func RouterInit(server *gin.Engine) {
 	server.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Next()

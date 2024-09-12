@@ -1,4 +1,4 @@
-package Commond
+package Common
 
 import (
 	"crypto/md5"

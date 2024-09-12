@@ -1,0 +1,68 @@
+basePath: /
+definitions:
+  Login.LoginRequest:
+    properties:
+      account:
+        type: string
+      password:
+        type: string
+    type: object
+  models.User:
+    properties:
+      Account:
+        description: gorm.Model
+        type: string
+      CreatedTime:
+        type: string
+      Id:
+        type: integer
+      Password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://example.com/support
+  description: This is a sample Gin server.
+  license:
+    name: MIT
+    url: http://example.com/license
+  termsOfService: http://example.com/terms/
+  title: Gin Swagger API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user with account and password credentials
+      parameters:
+      - description: Login credentials
+        in: body
+        name: LoginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/Login.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged in user
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User Login
+      tags:
+      - Login
+swagger: "2.0"

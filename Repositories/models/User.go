@@ -6,8 +6,8 @@ import (
 
 type User struct {
 	//gorm.Model
-	Account     string
-	Password    string
-	Id          int
-	CreatedTime time.Time
+	Account     string    `json:"Account"`
+	Password    string    `json:"Password"`
+	Id          int       `json:"Id"`
+	CreatedTime time.Time `json:"CreatedTime"`
 }

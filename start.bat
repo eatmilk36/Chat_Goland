@@ -14,3 +14,6 @@ go tool cover -html=coverage.out
 
 // 使用SQLite
 set CGO_ENABLED=1
+
+// swagger 產生文件
+swag init

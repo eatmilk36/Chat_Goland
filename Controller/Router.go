@@ -8,8 +8,6 @@ import (
 )
 
 func RouterInit() {
-	//database := Repositories.GormUserRepository{}.InitDatabase()
-
 	server := gin.Default()
 
 	server.Use(func(c *gin.Context) {
@@ -17,23 +15,20 @@ func RouterInit() {
 		c.Next()
 	})
 
-	//if mode := gin.Mode(); mode == gin.DebugMode {
-	//	url := ginSwagger.URL(fmt.Sprintf("http://localhost:%d/swagger/doc.json", "8080"))
-
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	//}
 
-	server.GET("hello/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		c.JSON(http.StatusOK, gin.H{"hello": name})
-	})
+	test := server.Group("/test")
+	{
+		test.GET("hello/:name", func(c *gin.Context) {
+			name := c.Param("name")
+			c.JSON(http.StatusOK, gin.H{"hello": name})
+		})
+	}
 
-	server.GET("hello2/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		c.JSON(http.StatusOK, gin.H{"hello": name})
-	})
-
-	server.POST("/Login", UserController{}.GetUser)
+	user := server.Group("/user")
+	{
+		user.POST("/Login", UserController{}.GetUser)
+	}
 
 	err := server.Run(":8080")
 	if err != nil {

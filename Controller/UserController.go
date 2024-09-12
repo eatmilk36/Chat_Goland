@@ -21,7 +21,6 @@ type UserController struct{}
 // @Failure 404 {object} map[string]interface{} "User not found"
 // @Router /login [post]
 func (ctrl UserController) GetUser(c *gin.Context) {
-
 	database := Repositories.GormUserRepository{}.InitDatabase()
 
 	// 初始化 UserRepository

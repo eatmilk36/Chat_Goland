@@ -33,7 +33,7 @@ func GenerateJWT(username string) (string, error) {
 
 	// 簽名 Token 並返回作為字串
 	config, _ := Config.LoadConfig()
-	tokenString, err := token.SignedString(config.Jwt.SecretKey)
+	tokenString, err := token.SignedString([]byte(config.Jwt.SecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -49,7 +49,7 @@ func ValidateJWT(tokenString string) (*MyCustomClaims, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		config, _ := Config.LoadConfig()
-		return config.Jwt.SecretKey, nil
+		return []byte(config.Jwt.SecretKey), nil
 	})
 
 	if err != nil {

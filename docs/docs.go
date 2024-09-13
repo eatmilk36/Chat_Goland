@@ -15,7 +15,54 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/user/Create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Login"
+                ],
+                "summary": "Create User",
+                "parameters": [
+                    {
+                        "description": "UserCreate Data",
+                        "name": "UserCreateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Create.UserCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Created User Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/user/Login": {
             "post": {
                 "description": "Logs in a user with account and password credentials",
                 "consumes": [
@@ -41,9 +88,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully logged in user",
+                        "description": "Successfully jwt",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -65,6 +112,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "Create.UserCreateRequest": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "createdTime": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "Login.LoginRequest": {
             "type": "object",
             "properties": {
@@ -75,35 +136,24 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "models.User": {
-            "type": "object",
-            "properties": {
-                "Account": {
-                    "description": "gorm.Model",
-                    "type": "string"
-                },
-                "CreatedTime": {
-                    "type": "string"
-                },
-                "Id": {
-                    "type": "integer"
-                },
-                "Password": {
-                    "type": "string"
-                }
-            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Gin Swagger API",
+	Title:            "Gin Swagger API Jeter",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

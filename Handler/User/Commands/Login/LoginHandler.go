@@ -1,6 +1,7 @@
 package Login
 
 import (
+	"chat/Common"
 	"chat/Ineterface"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -25,11 +26,13 @@ func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
 	}
 
 	// 使用解析出的 account 和 password
-	user, err := h.userRepo.GetUserByAccountAndPassword(req.Account, req.Password)
+	user, err := h.userRepo.GetUserByAccountAndPassword(req.Account, Common.Md5Hash(req.Password))
 
-	if err != nil {
+	if err != nil || user == nil {
 		c.JSON(http.StatusBadRequest, "user not found")
+		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	jwt, _ := Common.GenerateJWT(user.Account)
+	c.JSON(http.StatusOK, jwt)
 }

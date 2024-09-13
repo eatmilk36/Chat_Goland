@@ -26,6 +26,7 @@ func RouterInit(server *gin.Engine) {
 	user := server.Group("/user")
 	{
 		user.POST("/Login", UserController{}.GetUser)
+		user.POST("/Create", UserController{}.CreateUser)
 	}
 
 	err := server.Run(":8080")

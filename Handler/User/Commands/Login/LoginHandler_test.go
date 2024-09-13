@@ -8,15 +8,6 @@ import (
 	"time"
 )
 
-func TestLoginHandler(t *testing.T) {
-	result := 2 + 3
-	expected := 5
-
-	if result != expected {
-		t.Errorf("Add(2, 3) = %d; want %d", result, expected)
-	}
-}
-
 func TestUserInsert(t *testing.T) {
 	// 使用共用的 SetupTestDB 和 ResetDB
 	db := Test.SetupTestDB(t)

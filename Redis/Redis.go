@@ -93,3 +93,47 @@ func (r *RedisService) HashGet(ctx context.Context, key, field string) (string, 
 	}
 	return result, nil
 }
+
+func (r *RedisService) SaveUserLogin(ctx context.Context, username string, jwt string) error {
+	// 檢查是否已經存在
+	exists, err := r.client.HExists(ctx, "username:"+username, "name").Result()
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		// 更新 JWT
+		err := r.client.HSet(ctx, "username:"+username, "jwt", jwt).Err()
+		if err != nil {
+			return err
+		}
+	} else {
+		// 新增用戶和 JWT
+		err := r.client.HSet(ctx, "LoginUser:"+username, "username", username, "jwt", jwt).Err()
+		if err != nil {
+			return err
+		}
+	}
+
+	// 設置過期時間
+	err = r.client.Expire(ctx, "LoginUser:"+username, time.Second*10).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ListenForExpiredKeys 獨立的函數來監聽 Redis 的鍵過期事件
+func (r *RedisService) ListenForExpiredKeys(ctx context.Context) {
+	PubNub := r.client.PSubscribe(ctx, "__keyevent@0__:expired")
+	defer func(PubNub *redis.PubSub) {
+		_ = PubNub.Close()
+	}(PubNub)
+
+	for msg := range PubNub.Channel() {
+		fmt.Println("Key expired:", msg.Payload)
+		// 在這裡執行過期鍵的通知邏輯，例如透過 MQTT 或 WebSocket 發送通知
+	}
+}

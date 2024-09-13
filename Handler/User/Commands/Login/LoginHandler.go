@@ -3,7 +3,9 @@ package Login
 import (
 	"chat/Common"
 	"chat/Ineterface"
+	"chat/Redis"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/context"
 	"net/http"
 )
 
@@ -34,5 +36,14 @@ func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
 	}
 
 	jwt, _ := Common.GenerateJWT(user.Account)
+
+	redisService := Redis.NewRedisService()
+	err = redisService.SaveUserLogin(context.Background(), user.Account, jwt)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "Redis failed")
+		return
+	}
+
 	c.JSON(http.StatusOK, jwt)
 }

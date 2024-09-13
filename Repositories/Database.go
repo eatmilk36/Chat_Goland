@@ -21,7 +21,7 @@ func (repo GormUserRepository) InitDatabase() *gorm.DB {
 	addr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True",
 		config.MySql.UserName, config.MySql.Password, config.MySql.Address, config.MySql.Port, config.MySql.Database)
 	var err error
-	repo.db, err = gorm.Open(mysql.Open(addr), &gorm.Config{})
+	repo.db, err = gorm.Open(mysql.Open(addr))
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}

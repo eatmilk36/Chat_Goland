@@ -6,8 +6,7 @@
 	ctx := context.Background()
 
 	// 初始化 Redis 客戶端
-	client := Redis.NewRedisClient()
-	redisService := Redis.NewRedisService(client)
+	Redis.NewRedisService()
 
 	err := redisService.SetValue(ctx, "sandy", "sara")
 	if err != nil {

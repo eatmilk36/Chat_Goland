@@ -28,11 +28,16 @@ services:
   redis:
     image: redis:6
     container_name: redis
-    command: [ "redis-server", "--requirepass", "jeter" ]
+    command: >
+      sh -c "redis-server --requirepass jeter --save '' --appendonly no &
+             while ! redis-cli -h 127.0.0.1 -p 6379 -a jeter ping; do
+             echo 'Waiting for Redis to start...';
+             sleep 1;
+             done;
+             redis-cli -h 127.0.0.1 -p 6379 -a jeter CONFIG SET notify-keyspace-events Ex &&
+             tail -f /dev/null"
     ports:
       - "6379:6379"
-      # volumes:
-      # - redis_data:/data
     networks:
       - app_network
 

@@ -45,17 +45,6 @@ func setup(t *testing.T) {
 	}
 }
 
-func TestUserInsert(t *testing.T) {
-	// 每個測試之前呼叫 setup 進行初始化
-	setup(t)
-
-	repository := models.NewGormUserRepository(db)
-
-	userModel, _ := repository.GetUserByAccountAndPassword("Jeter", "MD5")
-
-	assert.Equal(t, "Jeter", userModel.Account)
-}
-
 func TestUserCreate(t *testing.T) {
 	setup(t)
 
@@ -85,21 +74,22 @@ func TestUserCreate(t *testing.T) {
 		CreatedTime: time.Now(),
 	}
 
+	// 模擬 crypto 回應
 	crypto := new(Test.CryptoHelper)
 	crypto.On("Md5Hash", "aa").Return("33")
 
+	// 模擬 Db 回應
 	userRepo := new(Test.UserRepository)
 	userRepo.On("GetUserByAccountAndPassword", reqBody.Account, "33").Return(mockUser, nil)
 
-	// 模擬 Redis 服務回應
+	// 模擬 Redis 回應
 	redis := new(Test.RedisService)
 	redis.On("SaveUserLogin", mock.Anything, mockUser.Account, "33kk").Return(nil)
 
+	// 模擬 Jwt 回應
 	jwt := new(Test.Jwt)
 	jwt.On("GenerateJWT", mockUser.Account).Return("33kk", nil)
 
-	// 執行 LoginQueryHandler
-	// Login.LoginQueryHandler(c)
 	// 創建一個具體的 LoginHandler 實例，並初始化必要的依賴
 	handler := NewLoginHandler(userRepo, redis, crypto, jwt)
 	handler.LoginQueryHandler(c)

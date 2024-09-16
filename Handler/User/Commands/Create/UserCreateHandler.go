@@ -7,17 +7,17 @@ import (
 	"net/http"
 )
 
-type CreateHandler struct {
+type Handler struct {
 	userRepo Ineterface.UserRepository
 	crypto   Ineterface.CryptoHelper
 }
 
 // NewLoginHandler 建立 CreateHandler 並注入 UserRepository
-func NewLoginHandler(userRepo Ineterface.UserRepository, crypto Ineterface.CryptoHelper) *CreateHandler {
-	return &CreateHandler{userRepo: userRepo, crypto: crypto}
+func NewLoginHandler(userRepo Ineterface.UserRepository, crypto Ineterface.CryptoHelper) *Handler {
+	return &Handler{userRepo: userRepo, crypto: crypto}
 }
 
-func (h *CreateHandler) CreatUserCommand(c *gin.Context) {
+func (h *Handler) CreatUserCommand(c *gin.Context) {
 	var req UserCreateRequest
 
 	// 綁定 JSON 參數

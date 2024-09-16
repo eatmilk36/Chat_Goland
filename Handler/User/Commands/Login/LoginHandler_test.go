@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"chat/Repositories/models"
 	"chat/Test"
+	"chat/Test/Mock"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -75,19 +76,19 @@ func TestUserCreate(t *testing.T) {
 	}
 
 	// 模擬 crypto 回應
-	crypto := new(Test.CryptoHelper)
+	crypto := new(Mock.CryptoHelper)
 	crypto.On("Md5Hash", "aa").Return("33")
 
 	// 模擬 Db 回應
-	userRepo := new(Test.UserRepository)
+	userRepo := new(Mock.UserRepository)
 	userRepo.On("GetUserByAccountAndPassword", reqBody.Account, "33").Return(mockUser, nil)
 
 	// 模擬 Redis 回應
-	redis := new(Test.RedisService)
+	redis := new(Mock.RedisService)
 	redis.On("SaveUserLogin", mock.Anything, mockUser.Account, "33kk").Return(nil)
 
 	// 模擬 Jwt 回應
-	jwt := new(Test.Jwt)
+	jwt := new(Mock.Jwt)
 	jwt.On("GenerateJWT", mockUser.Account).Return("33kk", nil)
 
 	// 創建一個具體的 LoginHandler 實例，並初始化必要的依賴

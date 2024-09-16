@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type LoginHandler struct {
+type Handler struct {
 	userRepo Ineterface.UserRepository
 	redis    Ineterface.RedisServiceInterface
 	crypto   Ineterface.CryptoHelper
@@ -15,11 +15,11 @@ type LoginHandler struct {
 }
 
 // NewLoginHandler 建立 LoginHandler 並注入 UserRepository
-func NewLoginHandler(userRepo Ineterface.UserRepository, redis Ineterface.RedisServiceInterface, crypto Ineterface.CryptoHelper, jwt Ineterface.JwtInterface) *LoginHandler {
-	return &LoginHandler{userRepo: userRepo, redis: redis, crypto: crypto, jwt: jwt}
+func NewLoginHandler(userRepo Ineterface.UserRepository, redis Ineterface.RedisServiceInterface, crypto Ineterface.CryptoHelper, jwt Ineterface.JwtInterface) *Handler {
+	return &Handler{userRepo: userRepo, redis: redis, crypto: crypto, jwt: jwt}
 }
 
-func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
+func (h *Handler) LoginQueryHandler(c *gin.Context) {
 	var req LoginRequest
 
 	// 綁定 JSON 參數

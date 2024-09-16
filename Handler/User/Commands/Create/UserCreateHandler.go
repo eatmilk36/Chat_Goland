@@ -1,7 +1,6 @@
 package Create
 
 import (
-	"chat/Common"
 	"chat/Ineterface"
 	"chat/Repositories/models"
 	"github.com/gin-gonic/gin"
@@ -10,11 +9,12 @@ import (
 
 type CreateHandler struct {
 	userRepo Ineterface.UserRepository
+	crypto   Ineterface.CryptoHelper
 }
 
 // NewLoginHandler 建立 CreateHandler 並注入 UserRepository
-func NewLoginHandler(userRepo Ineterface.UserRepository) *CreateHandler {
-	return &CreateHandler{userRepo: userRepo}
+func NewLoginHandler(userRepo Ineterface.UserRepository, crypto Ineterface.CryptoHelper) *CreateHandler {
+	return &CreateHandler{userRepo: userRepo, crypto: crypto}
 }
 
 func (h *CreateHandler) CreatUserCommand(c *gin.Context) {
@@ -28,7 +28,7 @@ func (h *CreateHandler) CreatUserCommand(c *gin.Context) {
 
 	err := h.userRepo.CreateUser(&models.User{
 		Account:     req.Account,
-		Password:    Common.Md5Hash(req.Password),
+		Password:    h.crypto.Md5Hash(req.Password),
 		CreatedTime: req.Createdtime,
 	})
 

@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type Jwt struct{}
+
 // MyCustomClaims 定義自訂的 Claim 結構
 type MyCustomClaims struct {
 	Username string `json:"username"`
@@ -14,7 +16,7 @@ type MyCustomClaims struct {
 }
 
 // GenerateJWT 產生JWT Token
-func GenerateJWT(username string) (string, error) {
+func (j Jwt) GenerateJWT(username string) (string, error) {
 
 	// 設定過期時間
 	expirationTime := time.Now().Add(1 * time.Hour)
@@ -24,7 +26,7 @@ func GenerateJWT(username string) (string, error) {
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
-			Issuer:    "your-app",
+			Issuer:    "chat",
 		},
 	}
 
@@ -41,7 +43,7 @@ func GenerateJWT(username string) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateJWT(tokenString string) (*MyCustomClaims, error) {
+func (j Jwt) ValidateJWT(tokenString string) (*MyCustomClaims, error) {
 	// 解析並驗證 JWT
 	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// 確認使用的簽名方法是否正確

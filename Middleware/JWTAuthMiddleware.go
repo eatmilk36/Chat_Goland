@@ -20,7 +20,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		tokenString := c.GetHeader("Authorization")
 
 		// 驗證 Token
-		claims, err := Common.ValidateJWT(tokenString)
+		claims, err := Common.Jwt{}.ValidateJWT(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()

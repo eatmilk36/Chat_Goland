@@ -1,16 +1,25 @@
 package Login
 
 import (
+	"bytes"
 	"chat/Repositories/models"
 	"chat/Test"
-	"github.com/go-playground/assert/v2"
+	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
 
-func TestUserInsert(t *testing.T) {
+var db *gorm.DB
+
+func setup(t *testing.T) {
 	// 使用共用的 SetupTestDB 和 ResetDB
-	db := Test.SetupTestDB(t)
+	db = Test.SetupTestDB(t)
 	Test.ResetDB(db)
 
 	// 插入測試資料
@@ -20,7 +29,6 @@ func TestUserInsert(t *testing.T) {
 		Id:          1,
 		CreatedTime: time.Now(),
 	}
-
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
@@ -35,10 +43,81 @@ func TestUserInsert(t *testing.T) {
 	if err := db.Create(&user).Error; err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
+}
+
+func TestUserInsert(t *testing.T) {
+	// 每個測試之前呼叫 setup 進行初始化
+	setup(t)
 
 	repository := models.NewGormUserRepository(db)
 
 	userModel, _ := repository.GetUserByAccountAndPassword("Jeter", "MD5")
 
 	assert.Equal(t, "Jeter", userModel.Account)
+}
+
+func TestUserCreate(t *testing.T) {
+	setup(t)
+
+	// 準備測試的請求
+	reqBody := LoginRequest{
+		Account:  "Jeter",
+		Password: "aa",
+	}
+	reqBodyJson, _ := json.Marshal(reqBody)
+	// 構建 HTTP 測試請求
+	req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(reqBodyJson))
+	//assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	// 使用 httptest 構建回應記錄器
+	rec := httptest.NewRecorder()
+
+	// Gin Context 構建
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = req
+
+	// 模擬使用者資料庫回應
+	mockUser := &models.User{
+		Account:     "Jeter",
+		Password:    "33",
+		Id:          1,
+		CreatedTime: time.Now(),
+	}
+
+	crypto := new(Test.CryptoHelper)
+	crypto.On("Md5Hash", "aa").Return("33")
+
+	userRepo := new(Test.UserRepository)
+	userRepo.On("GetUserByAccountAndPassword", reqBody.Account, "33").Return(mockUser, nil)
+
+	// 模擬 Redis 服務回應
+	redis := new(Test.RedisService)
+	redis.On("SaveUserLogin", mock.Anything, mockUser.Account, "33kk").Return(nil)
+
+	jwt := new(Test.Jwt)
+	jwt.On("GenerateJWT", mockUser.Account).Return("33kk", nil)
+
+	// 執行 LoginQueryHandler
+	// Login.LoginQueryHandler(c)
+	// 創建一個具體的 LoginHandler 實例，並初始化必要的依賴
+	handler := NewLoginHandler(userRepo, redis, crypto, jwt)
+	handler.LoginQueryHandler(c)
+
+	// 驗證 HTTP 狀態碼
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	// 驗證回應中的 JWT
+	var respBody string
+	err := json.Unmarshal(rec.Body.Bytes(), &respBody)
+	assert.NoError(t, err)
+
+	// 檢查回傳的 JWT 是否與模擬生成的 JWT 一致
+	assert.Equal(t, "33kk", respBody)
+
+	// 確認 Mock 的 CryptoHelper, UserRepository, RedisService 和 Jwt 的期望都達成
+	crypto.AssertExpectations(t)
+	userRepo.AssertExpectations(t)
+	redis.AssertExpectations(t)
+	jwt.AssertExpectations(t)
 }

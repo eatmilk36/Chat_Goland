@@ -1,8 +1,10 @@
 package Controller
 
 import (
+	"chat/Common"
 	"chat/Handler/User/Commands/Create"
 	"chat/Handler/User/Commands/Login"
+	"chat/Redis"
 	"chat/Repositories"
 	"chat/Repositories/models"
 	"github.com/gin-gonic/gin"
@@ -27,8 +29,17 @@ func (ctrl UserController) GetUser(c *gin.Context) {
 	// 初始化 UserRepository
 	userRepo := models.NewGormUserRepository(database)
 
+	// 初始化 RedisClient
+	redis := Redis.NewRedisService()
+
+	// 初始化 Crypto
+	helper := &Common.CryptoHelper{}
+
+	// 初始化 Jwt
+	jwt := Common.Jwt{}
+
 	// 注入到 LoginHandler
-	loginHandler := Login.NewLoginHandler(userRepo)
+	loginHandler := Login.NewLoginHandler(userRepo, redis, helper, jwt)
 
 	// 呼叫 業務邏輯
 	loginHandler.LoginQueryHandler(c)
@@ -50,8 +61,11 @@ func (ctrl UserController) CreateUser(c *gin.Context) {
 	// 初始化 UserRepository
 	userRepo := models.NewGormUserRepository(database)
 
-	// 注入到 LoginHandler
-	loginHandler := Create.NewLoginHandler(userRepo)
+	// 初始化 Crypto
+	helper := &Common.CryptoHelper{}
+
+	// 注入到 NewLoginHandler
+	loginHandler := Create.NewLoginHandler(userRepo, helper)
 
 	// 呼叫 業務邏輯
 	loginHandler.CreatUserCommand(c)

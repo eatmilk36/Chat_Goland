@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 )
 
-func Md5Hash(value string) string {
+type CryptoHelper struct{}
+
+func (c *CryptoHelper) Md5Hash(value string) string {
 	hash := md5.New()
 	hash.Write([]byte(value))
 	md5Hash := hash.Sum(nil)

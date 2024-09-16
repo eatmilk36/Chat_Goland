@@ -1,9 +1,7 @@
 package Login
 
 import (
-	"chat/Common"
 	"chat/Ineterface"
-	"chat/Redis"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 	"net/http"
@@ -11,11 +9,14 @@ import (
 
 type LoginHandler struct {
 	userRepo Ineterface.UserRepository
+	redis    Ineterface.RedisServiceInterface
+	crypto   Ineterface.CryptoHelper
+	jwt      Ineterface.JwtInterface
 }
 
 // NewLoginHandler 建立 LoginHandler 並注入 UserRepository
-func NewLoginHandler(userRepo Ineterface.UserRepository) *LoginHandler {
-	return &LoginHandler{userRepo: userRepo}
+func NewLoginHandler(userRepo Ineterface.UserRepository, redis Ineterface.RedisServiceInterface, crypto Ineterface.CryptoHelper, jwt Ineterface.JwtInterface) *LoginHandler {
+	return &LoginHandler{userRepo: userRepo, redis: redis, crypto: crypto, jwt: jwt}
 }
 
 func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
@@ -28,17 +29,16 @@ func (h *LoginHandler) LoginQueryHandler(c *gin.Context) {
 	}
 
 	// 使用解析出的 account 和 password
-	user, err := h.userRepo.GetUserByAccountAndPassword(req.Account, Common.Md5Hash(req.Password))
+	user, err := h.userRepo.GetUserByAccountAndPassword(req.Account, h.crypto.Md5Hash(req.Password))
 
 	if err != nil || user == nil {
 		c.JSON(http.StatusBadRequest, "user not found")
 		return
 	}
 
-	jwt, _ := Common.GenerateJWT(user.Account)
+	jwt, _ := h.jwt.GenerateJWT(user.Account)
 
-	redisService := Redis.NewRedisService()
-	err = redisService.SaveUserLogin(context.Background(), user.Account, jwt)
+	err = h.redis.SaveUserLogin(context.Background(), user.Account, jwt)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "Redis failed")

@@ -5,8 +5,31 @@ services:
     command: [ "./myapp" ]
     # volumes:
     # - .:/app
+    depends_on:
+      - mysql
+      - redis
     ports:
       - "8080:8080"
+    networks:
+      - app_network
+
+  cron:
+    container_name: chat_cron
+    build:
+      context: ./Chat_Cron
+    working_dir: /app
+    command: ["./myapp-cron"] # 根據你的排程應用名稱修改
+#    environment:
+#      - DB_HOST=mysql
+#      - DB_PORT=3306
+#      - DB_USER=jeter
+#      - DB_PASSWORD=12345678
+#      - REDIS_HOST=redis
+#      - REDIS_PORT=6379
+#      - REDIS_PASSWORD=jeter
+    depends_on:
+      - mysql
+      - redis
     networks:
       - app_network
 
